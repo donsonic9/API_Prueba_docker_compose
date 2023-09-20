@@ -1,0 +1,27 @@
+#En este archivo se nos facilita expecificar todas las configuraciones de docker
+#Viene a reemplazar a todos los parametros que, de otra forma, deberiamos aclarar en la terminal de comandos
+
+#Con esto especificamos la verion de docker compose que vamos a usar
+version: '3.8'
+
+#services se usa para especificar los contenedores que vamos a tener
+services:
+  #aqui van todos los contenedores que vamos a usar
+  mysqldb: #este es el nombre del contenedor
+    image: mysql #aqui va la imagen en la cual estara basada
+    env_file: ./.env #para que lea las variables de entorno del archivo .env
+    environment: #aqui le pasamos las variables de entorno como clave= valor
+      - MYSQL_ROOT_PASSWORD=$MYSQLDB_ROOT_PASSWORD
+      - MYSQL_DATABASE=$MYSQLDB_DATABASE
+    ports: #con esta propiedad se especifican los puertos a los que se exponen HOST:CONTAINER
+      - $MYSQLDB_LOCAL_PORT:$MYSQLDB_DOCKER_PORT
+
+  #construimos otro conteendor a partir del Dockerfile que ya tenemos
+  app:
+    build: . #Con este punto ya sabe que debe buscar el Dockerfile y ejecutar.
+    depends_on: #Como depende del primer container, lo aclaramos para orden de ejecucion.
+      - mysqldb
+    links: #para conectarlos.
+      - mysqldb
+    ports:
+      - $NODE_LOCAL_PORT:$NODE_DOCKER_PORT
